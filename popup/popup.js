@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleAutoScroll = document.getElementById("toggleAutoScroll");
   const toggleAutoClick = document.getElementById("toggleAutoClick");
   const toggleStealth = document.getElementById("toggleStealth");
+  const orbOpacitySelect = document.getElementById("orbOpacitySelect");
   const solveModeSelect = document.getElementById("solveModeSelect");
   const badgeStatus = document.getElementById("badgeStatus");
   const btnReloadExt = document.getElementById("btnReloadExt");
@@ -216,6 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "autoScrollSolveEnabled",
       "autoClickEnabled",
       "stealthMode",
+      "orbOpacityPresetIdx",
       "solveMode",
       "aiProvider",
       "claudeApiKey",
@@ -237,6 +239,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (toggleAutoScroll) toggleAutoScroll.checked = res.autoScrollSolveEnabled !== false;
       if (toggleAutoClick) toggleAutoClick.checked = res.autoClickEnabled === true;
       toggleStealth.checked = res.stealthMode === true;
+      if (typeof res.orbOpacityPresetIdx === "number" && orbOpacitySelect) {
+        orbOpacitySelect.value = String(res.orbOpacityPresetIdx);
+      }
       if (res.solveMode) solveModeSelect.value = res.solveMode;
 
       if (res.claudeApiKey && claudeApiKey) claudeApiKey.value = res.claudeApiKey;
@@ -389,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (toggleAutoScroll) toggleAutoScroll.addEventListener("change", () => saveSettings(false));
   if (toggleAutoClick) toggleAutoClick.addEventListener("change", () => saveSettings(false));
   toggleStealth.addEventListener("change", () => saveSettings(false));
+  if (orbOpacitySelect) orbOpacitySelect.addEventListener("change", () => saveSettings(false));
   solveModeSelect.addEventListener("change", () => saveSettings(false));
 
   // ==========================================
@@ -485,6 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
       autoScrollSolveEnabled: toggleAutoScroll ? toggleAutoScroll.checked : false,
       autoClickEnabled: toggleAutoClick ? toggleAutoClick.checked : false,
       stealthMode: toggleStealth.checked,
+      orbOpacityPresetIdx: orbOpacitySelect ? parseInt(orbOpacitySelect.value, 10) : 0,
       solveMode: solveModeSelect.value,
       aiProvider: currentProvider,
       claudeApiKey: claudeApiKey ? claudeApiKey.value.trim() : "",

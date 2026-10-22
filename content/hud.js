@@ -55,15 +55,15 @@
     ]
   };
 
-  const opacityLevels = [1.0, 0.45, 0.2];
+  const opacityLevels = [1.0, 0.45, 0.2, 0.06];
   let currentOpacityIndex = 0;
   const OPACITY_PRESETS = [
-    { label: "Siêu mờ (15%)", idle: 0.05, hover: 0.20, tooltip: 0.55 },
-    { label: "Mờ vừa (35%)", idle: 0.08, hover: 0.35, tooltip: 0.70 },
-    { label: "Mờ nhẹ (55%)", idle: 0.15, hover: 0.55, tooltip: 0.85 },
-    { label: "Rõ nét (75%)", idle: 0.25, hover: 0.75, tooltip: 0.95 }
+    { label: "Màn sáng trường (5%)", idle: 0.015, hover: 0.07, tooltip: 0.18 },
+    { label: "Siêu mờ (12%)", idle: 0.03, hover: 0.14, tooltip: 0.35 },
+    { label: "Mờ vừa (25%)", idle: 0.06, hover: 0.28, tooltip: 0.55 },
+    { label: "Rõ nét (60%)", idle: 0.15, hover: 0.60, tooltip: 0.85 }
   ];
-  let currentPresetIndex = 1;
+  let currentPresetIndex = 0;
   let toastTimer = null;
   let isMiniMode = true;
   let isPickQuestionMode = false;
@@ -90,6 +90,18 @@
     set autoScrollSolveEnabled(val) { this.toggleAutoScrollSolve(val); },
     get autoClickEnabled() { return autoClickEnabled; },
     set autoClickEnabled(val) { this.toggleAutoClick(val); },
+
+    applyStealthOrbVisibility(isStealth) {
+      if (!shadowRoot) return;
+      const orb = shadowRoot.getElementById("orbBtn");
+      if (orb) {
+        if (isStealth) {
+          orb.classList.add("hidden");
+        } else {
+          orb.classList.remove("hidden");
+        }
+      }
+    },
 
     ensureHudInsideFullscreen() {
       if (!widgetContainer) return;
@@ -185,7 +197,7 @@
     },
 
     applyOrbOpacityPreset(idx = currentPresetIndex, showToast = true, save = true) {
-      if (idx < 0 || idx >= OPACITY_PRESETS.length) idx = 1;
+      if (idx < 0 || idx >= OPACITY_PRESETS.length) idx = 0;
       currentPresetIndex = idx;
       const p = OPACITY_PRESETS[currentPresetIndex];
 
@@ -407,6 +419,13 @@
           transition: opacity 0.15s ease, transform 0.15s ease;
           animation: orbReadyDotPulse 1.8s ease-in-out infinite alternate;
         }
+        .theme-light .floating-orb.has-answer::after {
+          background: rgba(16, 185, 129, 0.45);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          box-shadow: 0 0 3px rgba(16, 185, 129, 0.3);
+          opacity: 0.55;
+          animation: none;
+        }
 
         @keyframes orbReadyDotPulse {
           0% { transform: scale(0.9); opacity: 0.85; }
@@ -428,7 +447,7 @@
           fill: #34d399 !important;
         }
         .theme-light .floating-orb.has-answer:not(:hover) svg {
-          fill: #059669 !important;
+          fill: #64748b !important;
         }
         .floating-orb.has-answer:not(:hover) .orb-letter {
           display: none !important;
@@ -447,9 +466,9 @@
           animation: orbAnswerPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
         }
         .theme-light .floating-orb.has-answer:hover {
-          background: rgba(255, 255, 255, 0.95) !important;
-          border-color: rgba(15, 23, 42, 0.25) !important;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+          background: rgba(255, 255, 255, 0.92) !important;
+          border-color: rgba(148, 163, 184, 0.3) !important;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
         }
         .floating-orb.has-answer:hover::after {
           display: none !important;
@@ -476,7 +495,7 @@
           text-shadow: none !important;
         }
         .theme-light .floating-orb.has-answer:hover .orb-letter {
-          color: #0f172a !important;
+          color: #334155 !important;
           text-shadow: none !important;
         }
 
@@ -590,15 +609,15 @@
 
         /* Tooltip Light Theme */
         .theme-light .orb-tooltip {
-          background: rgba(255, 255, 255, 0.78) !important;
-          border: 1px solid rgba(148, 163, 184, 0.35) !important;
-          color: #0f172a !important;
-          box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1) !important;
+          background: rgba(255, 255, 255, 0.88) !important;
+          border: 1px solid rgba(203, 213, 225, 0.5) !important;
+          color: #334155 !important;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
         }
-        .theme-light .orb-tooltip-title { color: #0f172a !important; }
-        .theme-light .orb-tooltip-letter { color: #2563eb !important; }
-        .theme-light .orb-tooltip-snippet { color: #334155 !important; }
-        .theme-light .orb-tooltip-hint { color: #64748b !important; }
+        .theme-light .orb-tooltip-title { color: #1e293b !important; }
+        .theme-light .orb-tooltip-letter { color: #0284c7 !important; }
+        .theme-light .orb-tooltip-snippet { color: #64748b !important; }
+        .theme-light .orb-tooltip-hint { color: #94a3b8 !important; }
 
         /* Toast thông báo độ mờ mini */
         .opacity-toast {
@@ -638,16 +657,16 @@
         .theme-dark .floating-orb svg, .floating-orb svg { fill: #38bdf8; }
 
         .theme-light .floating-orb {
-          background: rgba(255, 255, 255, 0.96);
-          border-color: rgba(59, 130, 246, 0.65);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 6px rgba(59, 130, 246, 0.2);
+          background: rgba(248, 250, 252, 0.75);
+          border-color: rgba(148, 163, 184, 0.25);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        .theme-light .floating-orb svg { fill: #2563eb; }
+        .theme-light .floating-orb svg { fill: #94a3b8; }
         .theme-light .opacity-toast {
-          background: rgba(255, 255, 255, 0.98);
-          color: #2563eb;
-          border-color: rgba(59, 130, 246, 0.5);
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+          background: rgba(255, 255, 255, 0.95);
+          color: #0284c7;
+          border-color: rgba(148, 163, 184, 0.35);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
         /* Giao diện HUD nền sáng khi ở trang trắng */
@@ -1263,9 +1282,9 @@
           <div class="orb-tooltip" id="orbTooltip">
             <div class="orb-tooltip-header">
               <div class="orb-tooltip-title">⚡ Way & Azota</div>
-              <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 15% ➔ 35% ➔ 55% ➔ 75%)">👁️ <span class="orb-eye-val" id="orbEyeVal">35%</span></button>
+              <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 5% ➔ 12% ➔ 25% ➔ 60%)">👁️ <span class="orb-eye-val" id="orbEyeVal">5%</span></button>
             </div>
-            <div class="orb-tooltip-hint">Click orb: Mở | 👁️: Đổi độ mờ</div>
+            <div class="orb-tooltip-hint">Click: Mở | 👁️: Đổi độ mờ (Cuộn/Chuột phải)</div>
           </div>
         </div>
         <div class="opacity-toast" id="opacityToast">👁️ 10%</div>
@@ -1994,15 +2013,18 @@
       this.bindOrbEyeButton();
 
       try {
-        chrome.storage.local.get(["orbOpacityPresetIdx"], (res) => {
+        chrome.storage.local.get(["orbOpacityPresetIdx", "stealthMode"], (res) => {
           if (!chrome.runtime.lastError && typeof res.orbOpacityPresetIdx === "number") {
             this.applyOrbOpacityPreset(res.orbOpacityPresetIdx, false, false);
           } else {
-            this.applyOrbOpacityPreset(1, false, false);
+            this.applyOrbOpacityPreset(0, false, false);
+          }
+          if (res && res.stealthMode !== undefined) {
+            this.applyStealthOrbVisibility(res.stealthMode);
           }
         });
       } catch (_) {
-        this.applyOrbOpacityPreset(1, false, false);
+        this.applyOrbOpacityPreset(0, false, false);
       }
 
       orb.addEventListener("click", () => {
@@ -2631,16 +2653,16 @@
             snippet = snippet.substring(0, 40) + "...";
           }
         }
-        const curPreset = OPACITY_PRESETS[currentPresetIndex] || OPACITY_PRESETS[1];
+        const curPreset = OPACITY_PRESETS[currentPresetIndex] || OPACITY_PRESETS[0];
         orbTooltip.innerHTML = `
           <div class="orb-tooltip-header">
             <div class="orb-tooltip-title">
               ✅ Đáp án: <span class="orb-tooltip-letter">${letter}</span>
             </div>
-            <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 15% ➔ 35% ➔ 55% ➔ 75%)">👁️ <span class="orb-eye-val" id="orbEyeVal">${Math.round(curPreset.hover * 100)}%</span></button>
+            <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 5% ➔ 12% ➔ 25% ➔ 60%)">👁️ <span class="orb-eye-val" id="orbEyeVal">${Math.round(curPreset.hover * 100)}%</span></button>
           </div>
           ${snippet ? `<div class="orb-tooltip-snippet">${snippet}</div>` : ""}
-          <div class="orb-tooltip-hint">Click orb: xem | 👁️: mờ (${curPreset.label})</div>
+          <div class="orb-tooltip-hint">Click: Xem | 👁️: ${curPreset.label} (Cuộn/Chuột phải)</div>
         `;
         this.bindOrbEyeButton();
       }
@@ -2691,13 +2713,13 @@
       orb.style.removeProperty("--ans-border");
       if (orbLetter) orbLetter.textContent = "";
       if (orbTooltip) {
-        const curPreset = OPACITY_PRESETS[currentPresetIndex] || OPACITY_PRESETS[1];
+        const curPreset = OPACITY_PRESETS[currentPresetIndex] || OPACITY_PRESETS[0];
         orbTooltip.innerHTML = `
           <div class="orb-tooltip-header">
             <div class="orb-tooltip-title">⚡ Way & Azota</div>
-            <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 15% ➔ 35% ➔ 55% ➔ 75%)">👁️ <span class="orb-eye-val" id="orbEyeVal">${Math.round(curPreset.hover * 100)}%</span></button>
+            <button class="orb-eye-btn" id="orbEyeBtn" title="Chỉnh độ mờ (Bấm để đổi: 5% ➔ 12% ➔ 25% ➔ 60%)">👁️ <span class="orb-eye-val" id="orbEyeVal">${Math.round(curPreset.hover * 100)}%</span></button>
           </div>
-          <div class="orb-tooltip-hint">Click orb: Mở | 👁️: Mờ (${curPreset.label})</div>
+          <div class="orb-tooltip-hint">Click: Mở | 👁️: ${curPreset.label} (Cuộn/Chuột phải)</div>
         `;
         this.bindOrbEyeButton();
       }

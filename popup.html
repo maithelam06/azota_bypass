@@ -62,13 +62,32 @@
     <!-- Chế độ Tàng Hình (Che Giảng Viên) -->
     <section class="section toggle-card" style="border: 1px solid rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.08);">
       <div class="toggle-info">
-        <label class="toggle-title" for="toggleStealth" style="color: #c084fc;">👻 Tàng hình (Ẩn quả cầu tròn)</label>
-        <span class="toggle-desc">Không để lại icon trên màn hình, chỉ dùng Alt+Q</span>
+        <label class="toggle-title" for="toggleStealth" style="color: #c084fc;">👻 Tàng hình (Ẩn hoàn toàn quả cầu)</label>
+        <span class="toggle-desc">Không để lại bất kỳ icon nào trên màn hình, chỉ dùng Alt+Q</span>
       </div>
       <label class="switch">
         <input type="checkbox" id="toggleStealth">
         <span class="slider round" style="background-color: #7c3aed;"></span>
       </label>
+    </section>
+
+    <!-- Độ mờ nút hiển thị đáp án (Tối ưu cho máy trường màn sáng) -->
+    <section class="section" style="border: 1px solid rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.06); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;">
+        <label class="field-label" for="orbOpacitySelect" style="color: #38bdf8; font-weight: 700; margin: 0;">
+          👁️ Độ mờ nút đáp án (Góc màn hình):
+        </label>
+        <span style="color: #34d399; font-size: 10px; font-weight: 700;">★ MÁY TRƯỜNG</span>
+      </div>
+      <select id="orbOpacitySelect" style="font-weight: 600; width: 100%; padding: 6px 8px; border-radius: 6px; background: #0f172a; color: #f1f5f9; border: 1px solid #334155; font-size: 12px;">
+        <option value="0" selected>👻 Màn sáng trường (Cực mờ ~5% - Chống nhìn trộm)</option>
+        <option value="1">🌫️ Siêu mờ (12% - Rất khó phát hiện)</option>
+        <option value="2">🌤️ Mờ vừa (25% - Cân bằng)</option>
+        <option value="3">☀️ Rõ nét (60% - Dễ nhìn)</option>
+      </select>
+      <div style="font-size: 10.5px; color: #94a3b8; margin-top: 5px; line-height: 1.4;">
+        💡 <em>Mẹo:</em> Khi đang làm bài, bạn có thể <strong>click chuột phải</strong> hoặc <strong>lăn chuột</strong> ngay trên nút tròn ở góc màn hình để tăng/giảm độ mờ tức thì!
+      </div>
     </section>
 
     <!-- Chiến thuật Giải Đề (Độ chính xác & Tốc độ) -->

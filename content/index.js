@@ -97,14 +97,20 @@
   }
 
   try {
-    chrome.storage.local.get(["extensionEnabled", "unblockCopyEnabled", "stealthMode", "autoScrollSolveEnabled", "autoClickEnabled"], (res) => {
+    chrome.storage.local.get(["extensionEnabled", "unblockCopyEnabled", "stealthMode", "autoScrollSolveEnabled", "autoClickEnabled", "orbOpacityPresetIdx"], (res) => {
       if (chrome.runtime.lastError) return;
       if (res.extensionEnabled !== undefined) isEnabled = res.extensionEnabled;
       if (res.unblockCopyEnabled !== undefined && window.__wgBypass) {
         window.__wgBypass.unblockCopyEnabled = res.unblockCopyEnabled;
       }
-      if (res.stealthMode !== undefined && window.__wgBypass) {
-        window.__wgBypass.stealthMode = res.stealthMode;
+      if (res.stealthMode !== undefined) {
+        if (window.__wgBypass) window.__wgBypass.stealthMode = res.stealthMode;
+        if (window.__wgHud && window.__wgHud.applyStealthOrbVisibility) {
+          window.__wgHud.applyStealthOrbVisibility(res.stealthMode);
+        }
+      }
+      if (typeof res.orbOpacityPresetIdx === "number" && window.__wgHud && window.__wgHud.applyOrbOpacityPreset) {
+        window.__wgHud.applyOrbOpacityPreset(res.orbOpacityPresetIdx, false, false);
       }
       const autoScroll = res.autoScrollSolveEnabled !== undefined ? res.autoScrollSolveEnabled : true;
       if (window.__wgHud) {
@@ -131,6 +137,15 @@
         }
         if (changes.unblockCopyEnabled && window.__wgBypass) {
           window.__wgBypass.unblockCopyEnabled = changes.unblockCopyEnabled.newValue;
+        }
+        if (changes.stealthMode) {
+          if (window.__wgBypass) window.__wgBypass.stealthMode = changes.stealthMode.newValue;
+          if (window.__wgHud && window.__wgHud.applyStealthOrbVisibility) {
+            window.__wgHud.applyStealthOrbVisibility(changes.stealthMode.newValue);
+          }
+        }
+        if (changes.orbOpacityPresetIdx !== undefined && window.__wgHud && window.__wgHud.applyOrbOpacityPreset) {
+          window.__wgHud.applyOrbOpacityPreset(changes.orbOpacityPresetIdx.newValue, true, false);
         }
         if (changes.autoScrollSolveEnabled && window.__wgHud) {
           window.__wgHud.toggleAutoScrollSolve(changes.autoScrollSolveEnabled.newValue, false);

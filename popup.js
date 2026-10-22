@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const toggleCopy = document.getElementById("toggleCopy");
   const toggleAutoScroll = document.getElementById("toggleAutoScroll");
   const toggleStealth = document.getElementById("toggleStealth");
+  const orbOpacitySelect = document.getElementById("orbOpacitySelect");
   const solveModeSelect = document.getElementById("solveModeSelect");
   const badgeStatus = document.getElementById("badgeStatus");
   const btnReloadExt = document.getElementById("btnReloadExt");
@@ -198,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "unblockCopyEnabled",
       "autoScrollSolveEnabled",
       "stealthMode",
+      "orbOpacityPresetIdx",
       "solveMode",
       "aiProvider",
       "geminiApiKey",
@@ -216,6 +218,9 @@ document.addEventListener("DOMContentLoaded", () => {
       toggleCopy.checked = res.unblockCopyEnabled !== false;
       if (toggleAutoScroll) toggleAutoScroll.checked = res.autoScrollSolveEnabled === true;
       if (toggleStealth) toggleStealth.checked = res.stealthMode === true;
+      if (typeof res.orbOpacityPresetIdx === "number" && orbOpacitySelect) {
+        orbOpacitySelect.value = String(res.orbOpacityPresetIdx);
+      }
       if (res.solveMode) solveModeSelect.value = res.solveMode;
 
       if (res.geminiApiKey) geminiApiKey.value = res.geminiApiKey;
@@ -355,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
   toggleCopy.addEventListener("change", () => saveSettings(false));
   if (toggleAutoScroll) toggleAutoScroll.addEventListener("change", () => saveSettings(false));
   if (toggleStealth) toggleStealth.addEventListener("change", () => saveSettings(false));
+  if (orbOpacitySelect) orbOpacitySelect.addEventListener("change", () => saveSettings(false));
   solveModeSelect.addEventListener("change", () => saveSettings(false));
 
   // ==========================================
@@ -438,6 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
       unblockCopyEnabled: toggleCopy.checked,
       autoScrollSolveEnabled: toggleAutoScroll ? toggleAutoScroll.checked : false,
       stealthMode: toggleStealth ? toggleStealth.checked : false,
+      orbOpacityPresetIdx: orbOpacitySelect ? parseInt(orbOpacitySelect.value, 10) : 0,
       solveMode: solveModeSelect.value,
       aiProvider: currentProvider,
       geminiApiKey: geminiApiKey ? geminiApiKey.value.trim() : "",
