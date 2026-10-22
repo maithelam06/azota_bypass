@@ -1,0 +1,100 @@
+{
+  "manifest_version": 3,
+  "name": "Wayground & Azota AI PRO - Multi-Model Auto Solver (Anti-Proctor Stealth)",
+  "version": "4.0.0",
+  "author": "Lâm Dev",
+  "description": "Trợ lý thi cử Wayground & Azota Pro: Chống giám sát Anti-Cheat, Tự động quét câu hỏi & Tự động ấn đáp án đúng 10/10. Bản quyền phát triển bởi Lâm Dev.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "https://api.deepseek.com/*",
+    "https://api.groq.com/*",
+    "https://openrouter.ai/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "commands": {
+    "trigger_alt_q": {
+      "suggested_key": {
+        "default": "Alt+Q",
+        "windows": "Alt+Q",
+        "mac": "Alt+Q"
+      },
+      "description": "Kích hoạt giải nhanh AI (Alt + Q)"
+    },
+    "pick_question": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "windows": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "Bật/Tắt chế độ Chỉ câu (Alt + S)"
+    },
+    "hide_hud": {
+      "suggested_key": {
+        "default": "Alt+H",
+        "windows": "Alt+H",
+        "mac": "Alt+H"
+      },
+      "description": "Ẩn/Hiện nhanh bảng AI (Alt + H)"
+    },
+    "capture_solve": {
+      "suggested_key": {
+        "default": "Alt+V",
+        "windows": "Alt+V",
+        "mac": "Alt+V"
+      },
+      "description": "Chụp & giải đề bằng AI Vision (Alt + V)"
+    }
+  },
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/inject.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/bypass.js",
+        "content/scanner.js",
+        "content/hud.js",
+        "content/index.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

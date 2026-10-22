@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wayground AI Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-badge">⚡</div>
+        <div>
+          <h2>Wayground AI Turbo</h2>
+          <span class="subtitle">Gemini & ChatGPT Siêu Tốc</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button id="btnReloadExt" title="Làm mới Tiện ích & Cập nhật bảng HUD trên trang" style="background:#1e293b; border:1px solid #334155; color:#38bdf8; border-radius:6px; padding:4px 7px; font-size:11px; font-weight:700; cursor:pointer;">🔄 Cập nhật HUD</button>
+        <div class="badge-status" id="badgeStatus">ĐANG TẮT</div>
+      </div>
+    </header>
+
+    <!-- Kích hoạt trước khi kiểm tra -->
+    <section class="section toggle-card">
+      <div class="toggle-info">
+        <label class="toggle-title" for="toggleExtension">Kích hoạt trước bài thi</label>
+        <span class="toggle-desc">Bật trợ lý nổi & phím tắt Alt + Q trên trang</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleExtension" checked>
+        <span class="slider round"></span>
+      </label>
+    </section>
+
+    <!-- Mở khóa sao chép -->
+    <section class="section toggle-card">
+      <div class="toggle-info">
+        <label class="toggle-title" for="toggleCopy">Mở khóa sao chép (Bypass)</label>
+        <span class="toggle-desc">Chống chặn chuột phải, bôi đen khi web cấm</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleCopy" checked>
+        <span class="slider round"></span>
+      </label>
+    </section>
+
+    <!-- Tự động quét khi lăn chuột -->
+    <section class="section toggle-card" style="border: 1px solid rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.08);">
+      <div class="toggle-info">
+        <label class="toggle-title" for="toggleAutoScroll" style="color: #22d3ee;">📜 Cuộn chuột tự tra (Auto-Scroll)</label>
+        <span class="toggle-desc">Tự quét & giải câu hỏi khi lăn chuột, đỡ phải bôi đen (Alt+A)</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleAutoScroll">
+        <span class="slider round" style="background-color: #0891b2;"></span>
+      </label>
+    </section>
+
+    <!-- Chế độ Tàng Hình (Che Giảng Viên) -->
+    <section class="section toggle-card" style="border: 1px solid rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.08);">
+      <div class="toggle-info">
+        <label class="toggle-title" for="toggleStealth" style="color: #c084fc;">👻 Tàng hình (Ẩn quả cầu tròn)</label>
+        <span class="toggle-desc">Không để lại icon trên màn hình, chỉ dùng Alt+Q</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="toggleStealth">
+        <span class="slider round" style="background-color: #7c3aed;"></span>
+      </label>
+    </section>
+
+    <!-- Chiến thuật Giải Đề (Độ chính xác & Tốc độ) -->
+    <section class="section">
+      <label class="field-label" for="solveModeSelect">🎯 Chiến thuật giải đề:
+        <span style="color: #10b981; font-size: 10px;">★ KHUYÊN DÙNG</span>
+      </label>
+      <select id="solveModeSelect" style="font-weight: 600; color: #38bdf8;">
+        <option value="balanced" selected>🎯 Vừa Nhanh Vừa Chuẩn (Chống bẫy, ~0.6s)</option>
+        <option value="ultra_fast">⚡ Siêu Tốc Kỷ Lục (Chỉ lấy đáp án, ~0.3s)</option>
+        <option value="deep">🧠 Phân Tích Kỹ (Cho bài toán khó, ~1.5s)</option>
+      </select>
+    </section>
+
+    <!-- Lựa chọn AI: Gemini hoặc ChatGPT -->
+    <section class="section">
+      <label class="field-label">Chọn AI sử dụng:</label>
+      <div class="provider-tabs" style="flex-wrap: wrap;">
+        <button type="button" class="tab-btn active" id="tabGemini">✨ Gemini</button>
+        <button type="button" class="tab-btn" id="tabDeepSeek" style="color:#38bdf8;">🐳 DeepSeek</button>
+        <button type="button" class="tab-btn" id="tabGroq">⚡ Groq</button>
+        <button type="button" class="tab-btn" id="tabOpenRouter" style="color:#a78bfa;">🆓 OpenRouter</button>
+        <button type="button" class="tab-btn" id="tabChatGPT">🤖 ChatGPT</button>
+      </div>
+
+      <!-- Cấu hình Gemini -->
+      <div id="geminiSection" class="config-panel">
+        <label class="field-label" for="geminiApiKey">Gemini API Key:
+          <a href="https://aistudio.google.com/apikey" target="_blank" class="link-get-key">Lấy key miễn phí ↗</a>
+        </label>
+        <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 11px; color: #93c5fd;">
+          💡 Bấm <strong>"Create API key in new project"</strong> → Copy key dạng <code style="color:#60a5fa">AIzaSy...</code>. Nếu key dạng AQ. thì cần <a href="https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com" target="_blank" style="color:#a78bfa">bật API ở đây</a>.
+        </div>
+        <div class="input-group">
+          <input type="password" id="geminiApiKey" placeholder="AIzaSy...">
+          <button type="button" id="btnToggleGeminiKey" class="btn-sm">👁️</button>
+        </div>
+
+        <label class="field-label" for="geminiModel">Mô hình Gemini:</label>
+        <select id="geminiModel">
+          <optgroup label="👑 Dòng Pro - Chuẩn xác cao nhất (Free 15 RPM)">
+            <option value="gemini-3.1-pro-preview">🧠 Gemini 3.1 Pro (Toán/Lý/Hóa khó - Chuẩn xác 10/10, Free)</option>
+          </optgroup>
+          <optgroup label="🚀 Dòng Flash - Siêu tốc & Thông minh (Free 100%)">
+            <option value="gemini-3.8-flash">🚀 Gemini 3.8 Flash (Thông minh & Chuẩn hơn 3.5, Cực nhanh)</option>
+            <option value="gemini-3.5-flash-lite" selected>⚡ Gemini 3.5 Flash-Lite (Khuyên dùng: Siêu tốc 0.2s, Quota cao)</option>
+            <option value="gemini-3.5-flash">💡 Gemini 3.5 Flash (Ổn định)</option>
+          </optgroup>
+          <optgroup label="🌟 Gemini 4 Frontier">
+            <option value="gemini-4-argon">🌟 Gemini 4 Argon (Gen 4 Đỉnh cao - Cần Billing)</option>
+          </optgroup>
+          <optgroup label="Gemini 2.5 (Key cũ)">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <!-- Cấu hình DeepSeek -->
+      <div id="deepseekSection" class="config-panel" style="display: none;">
+        <label class="field-label" for="deepseekApiKey">DeepSeek API Key:
+          <a href="https://platform.deepseek.com/api_keys" target="_blank" class="link-get-key">Lấy key DeepSeek ↗</a>
+        </label>
+        <div class="input-group">
+          <input type="password" id="deepseekApiKey" placeholder="sk-...">
+          <button type="button" id="btnToggleDeepseekKey" class="btn-sm">👁️</button>
+        </div>
+
+        <label class="field-label" for="deepseekModel">Mô hình DeepSeek:</label>
+        <select id="deepseekModel">
+          <option value="deepseek-chat" selected>🚀 DeepSeek V3 (deepseek-chat - Nhanh & Chuẩn xác)</option>
+          <option value="deepseek-reasoner">🧠 DeepSeek R1 (deepseek-reasoner - Chuyên giải Toán/Lý/Hóa khó)</option>
+        </select>
+      </div>
+
+      <!-- Cấu hình ChatGPT -->
+      <div id="chatgptSection" class="config-panel" style="display: none;">
+        <label class="field-label" for="openaiApiKey">OpenAI API Key:
+          <a href="https://platform.openai.com/api-keys" target="_blank" class="link-get-key">Lấy key OpenAI ↗</a>
+        </label>
+        <div class="input-group">
+          <input type="password" id="openaiApiKey" placeholder="sk-proj-...">
+          <button type="button" id="btnToggleOpenaiKey" class="btn-sm">👁️</button>
+        </div>
+
+        <label class="field-label" for="openaiModel">Mô hình ChatGPT:</label>
+        <select id="openaiModel">
+          <option value="gpt-4o-mini" selected>⚡ GPT-4o Mini (Cực nhanh, chính xác & rẻ)</option>
+          <option value="gpt-4.1-mini">🚀 GPT-4.1 Mini (Thế hệ mới, thông minh)</option>
+          <option value="gpt-4o">🔥 GPT-4o (Đỉnh cao toàn diện)</option>
+          <option value="o3-mini">🧠 o3-mini (Tư duy toán học & STEM)</option>
+        </select>
+      </div>
+
+      <!-- Cấu hình Groq AI -->
+      <div id="groqSection" class="config-panel" style="display: none;">
+        <label class="field-label" for="groqApiKey">Groq API Key:
+          <a href="https://console.groq.com/keys" target="_blank" class="link-get-key">Lấy key Groq (Free 5s) ↗</a>
+        </label>
+        <div class="input-group">
+          <input type="password" id="groqApiKey" placeholder="gsk_...">
+          <button type="button" id="btnToggleGroqKey" class="btn-sm">👁️</button>
+        </div>
+
+        <label class="field-label" for="groqModel">Mô hình Groq:</label>
+        <select id="groqModel">
+          <option value="llama-3.3-70b-versatile" selected>🧠 Llama 3.3 70B Versatile (Mạnh nhất - Chuẩn 10/10 - Free)</option>
+          <option value="deepseek-r1-distill-llama-70b">🐳 DeepSeek R1 Distill 70B (Tư duy Toán/Lý/Hóa đỉnh cao - Free)</option>
+          <option value="meta-llama/llama-4-scout-17b-16e-instruct">🚀 Llama 4 Scout (Thế hệ Llama 4 mới nhất - Free)</option>
+          <option value="llama-3.1-8b-instant">⚡ Llama 3.1 8B Instant (Siêu tốc tức thời ~0.1s)</option>
+        </select>
+      </div>
+
+      <!-- Cấu hình OpenRouter -->
+      <div id="openrouterSection" class="config-panel" style="display: none;">
+        <label class="field-label" for="openrouterApiKey">OpenRouter API Key:
+          <a href="https://openrouter.ai/keys" target="_blank" class="link-get-key">Lấy key miễn phí ↗</a>
+        </label>
+        <div style="background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 11px; color: #c4b5fd;">
+          🆓 Đăng ký tại openrouter.ai → API Keys → Create → Copy key (dạng <code style="color:#a78bfa">sk-or-v1-...</code>). Hoàn toàn miễn phí, không cần thẻ!
+        </div>
+        <div class="input-group">
+          <input type="password" id="openrouterApiKey" placeholder="sk-or-v1-...">
+          <button type="button" id="btnToggleOpenrouterKey" class="btn-sm">👁️</button>
+        </div>
+
+        <label class="field-label" for="openrouterModel">Mô hình (tất cả miễn phí):</label>
+        <select id="openrouterModel">
+          <option value="deepseek/deepseek-chat-v3-0324:free" selected>🧠 DeepSeek V3 0324 (Giải đề siêu chuẩn - FREE)</option>
+          <option value="deepseek/deepseek-r1:free">🐳 DeepSeek R1 (Tư duy giải toán - FREE)</option>
+          <option value="openrouter/free">🚀 Auto Free Router (Tự chọn model Free nhanh nhất)</option>
+          <option value="meta-llama/llama-3.3-70b-instruct:free">🔥 Llama 3.3 70B Instruct (Meta - FREE)</option>
+          <option value="google/gemma-3-27b-it:free">⚡ Gemma 3 27B IT (Google - FREE)</option>
+          <option value="qwen/qwen-2.5-72b-instruct:free">💡 Qwen 2.5 72B Instruct (Alibaba - FREE)</option>
+          <option value="mistralai/mistral-small-3.1-24b-instruct:free">✨ Mistral Small 3.1 24B (Nhanh - FREE)</option>
+        </select>
+      </div>
+
+      <!-- Nút Kiểm Tra Kết Nối API -->
+      <button type="button" id="btnTestApi" class="btn-test-api">
+        ⚡ Kiểm Tra Kết Nối API Ngay
+      </button>
+      <div id="testApiResult" class="test-api-box" style="display: none;"></div>
+    </section>
+
+    <!-- Mẹo thi tốc độ -->
+    <section class="section guide-box">
+      <div class="guide-title">🚀 Mẹo làm bài nhanh như chớp:</div>
+      <ul class="guide-list">
+        <li>🆓 <strong>Groq miễn phí:</strong> Chọn tab Groq → lấy key tại <a href="https://console.groq.com/keys" target="_blank" style="color:#a78bfa">console.groq.com/keys</a> → dùng ngay!</li>
+        <li>Bôi đen câu hỏi ➔ bấm <kbd>Alt + Q</kbd> (không cần mở cửa sổ, kết quả hiện tức thì).</li>
+        <li>Model khuyên dùng: <strong>Gemini 2.0 Flash Lite</strong> hoặc <strong>Groq Llama 3 70B</strong> (miễn phí).</li>
+        <li>⚠️ Gemini key lấy tại <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#a78bfa">AI Studio</a> (key dạng <code>AIza...</code>).</li>
+      </ul>
+    </section>
+
+    <!-- Nút lưu cấu hình -->
+    <footer class="footer">
+      <button id="btnSave" class="btn-primary">💾 Lưu & Sẵn Sàng Làm Bài</button>
+      <div id="saveToast" class="toast">Đã lưu cài đặt thành công!</div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

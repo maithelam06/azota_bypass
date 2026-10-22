@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wayground Proctored Exam - Phòng Test Đầy Đủ Các Trường Hợp Chặn & Quét Đề</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      -moz-user-select: none;
+    }
+
+    body {
+      background: #0b1120;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 24px 16px 60px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .exam-wrapper {
+      max-width: 840px;
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 26px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Header & Thanh trạng thái Giám sát (Proctor Simulator) */
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+
+    .exam-title h1 {
+      font-size: 20px;
+      margin: 0 0 5px 0;
+      color: #38bdf8;
+    }
+
+    .exam-title p {
+      font-size: 12.5px;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-fullscreen-exam {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      color: #fff;
+      border: 1px solid #60a5fa;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn-fullscreen-exam:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .timer-badge {
+      background: #ef4444;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    /* Bảng theo dõi Giám sát thi (Để test Anti-Detect Fullscreen & Tab Switch) */
+    .proctor-panel {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .proctor-stat {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .proctor-stat .label {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+    .proctor-stat .val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #34d399;
+    }
+    .proctor-stat .val.danger {
+      color: #f87171;
+    }
+
+    /* Hướng dẫn tổng quan 3 cách test */
+    .test-scenarios-guide {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+    .test-scenarios-guide h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #38bdf8;
+    }
+
+    /* Thẻ câu hỏi */
+    .question-card {
+      position: relative;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .case-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .badge-case1 {
+      background: rgba(59, 130, 246, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+    .badge-case2 {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .badge-case3 {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .badge-case4 {
+      background: rgba(236, 72, 153, 0.2);
+      color: #f472b6;
+      border: 1px solid rgba(236, 72, 153, 0.4);
+    }
+
+    .case-instruction {
+      background: rgba(30, 41, 59, 0.8);
+      border-left: 3px solid #38bdf8;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #bae6fd;
+      margin-bottom: 12px;
+    }
+
+    .question-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .question-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 14px;
+      color: #ffffff;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .option-item:hover {
+      border-color: #38bdf8;
+      background: #253349;
+    }
+
+    .option-radio {
+      accent-color: #38bdf8;
+      width: 17px;
+      height: 17px;
+    }
+
+    .option-text {
+      font-size: 13.5px;
+      color: #e2e8f0;
+    }
+
+    /* Lớp màng phủ Watermark giả lập trường hợp 2 */
+    .watermark-shield {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -25deg,
+        transparent,
+        transparent 80px,
+        rgba(239, 68, 68, 0.03) 80px,
+        rgba(239, 68, 68, 0.03) 160px
+      );
+      z-index: 5;
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 6px 10px;
+      font-size: 10px;
+      color: rgba(248, 113, 113, 0.45);
+    }
+
+    .canvas-container {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    kbd {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: #fbbf24;
+      font-family: monospace;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body id="examRootBody" oncontextmenu="return false;" oncopy="return false;" oncut="return false;" onselectstart="return false;">
+
+  <div class="exam-wrapper" id="examContainer">
+    <!-- Header bài thi -->
+    <div class="exam-header">
+      <div class="exam-title">
+        <h1>🛡️ Phòng Thi Mô Phỏng Full Chế Độ Bảo Mật</h1>
+        <p>Test đầy đủ 4 cấp độ khóa đề thi & Chế độ chống phát hiện thoát Full màn hình</p>
+      </div>
+      <div class="header-controls">
+        <button type="button" class="btn-fullscreen-exam" id="btnEnterExamFullscreen">
+          🖥️ Bật Thi Toàn Màn Hình (Test Fullscreen)
+        </button>
+        <div class="timer-badge" id="examTimer">⏱️ 29:59</div>
+      </div>
+    </div>
+
+    <!-- Bảng giám sát gian lận của trang thi (Proctor Dashboard) -->
+    <div class="proctor-panel">
+      <div class="proctor-stat">
+        <span class="label">🖥️ Trạng thái Fullscreen trang nhận thấy:</span>
+        <span class="val" id="statFullscreen">Đang bình thường</span>
+      </div>
+      <div class="proctor-stat">
+        <span class="label">👀 Trạng thái Focus / Chuyển Tab:</span>
+        <span class="val" id="statFocus">Đang tập trung làm bài</span>
+      </div>
+      <div class="proctor-stat">
+        <span class="label">🚨 Số lần trang bắt được vi phạm:</span>
+        <span class="val" id="statViolations">0 lần (An toàn 100%)</span>
+      </div>
+    </div>
+
+    <!-- HƯỚNG DẪN TỔNG QUAN 4 CÁCH TEST -->
+    <div class="test-scenarios-guide">
+      <h3>📋 Hướng dẫn Test nhanh 4 trường hợp bên dưới:</h3>
+      1️⃣ <strong>Test Full màn hình & Đổi Model không bị phát hiện:</strong> Bấm nút tím <strong>"🖥️ Bật Thi Toàn Màn Hình"</strong> ở góc trên ➔ Bấm <kbd>Alt + Q</kbd> mở HUD ➔ Đổi thử Model/Hãng AI ngay trên đầu HUD hoặc bấm <kbd>Alt + H</kbd> để ẩn/hiện HUD (Số lần vi phạm vẫn giữ nguyên = <strong>0 lần</strong>!).<br>
+      2️⃣ <strong>Cách 1 (Bôi đen / Trỏ chuột + <kbd>Alt + Q</kbd>):</strong> Thử ở <strong>Câu 1</strong> (Chặn CSS `user-select: none` cơ bản).<br>
+      3️⃣ <strong>Cách 2 (Chặn bôi đen tuyệt đối + Lớp phủ Watermark ➔ Dùng <kbd>👆 Chỉ câu</kbd> hoặc Trỏ chuột <kbd>Alt + Q</kbd>):</strong> Thử ở <strong>Câu 2</strong> (Cố tình xóa vùng bôi đen liên tục để không thể bôi đen bằng chuột).<br>
+      4️⃣ <strong>Cách 3 (Nút <kbd>🔍 Quét đề</kbd> chọn từng câu <kbd>Câu 1</kbd> <kbd>Câu 2</kbd> <kbd>Câu 3</kbd> <kbd>Câu 4</kbd>):</strong> Bấm nút <strong>🔍 Quét đề</strong> trên HUD để hiện thanh chọn nhanh tất cả các câu.<br>
+      5️⃣ <strong>Cách 4 (Đề thi là Hình ảnh / Canvas không có chữ ➔ Dùng nút <kbd>📸 Chụp</kbd> hoặc <kbd>Alt + V</kbd>):</strong> Thử ở <strong>Câu 5 (Cuối trang)</strong> được vẽ hoàn toàn bằng đồ họa Canvas!<br>
+      6️⃣ <strong>Cách 5 (🔥 LĂN CHUỘT TỰ TRA ĐỠ BÔI ĐEN ➔ <kbd>Alt + A</kbd> hoặc nút <kbd>📜 Cuộn tra</kbd>):</strong> Bấm nút <strong>📜 Cuộn tra</strong> trên HUD (hoặc bấm <kbd>Alt + A</kbd>) để kích hoạt. Sau đó bạn chỉ việc lăn chuột cuộn bài thi, hệ thống sẽ <strong>tự phát hiện câu hỏi giữa màn hình, viền sáng và tự tra cứu ngay lập tức</strong> mà không cần bôi đen hay bấm nút gì thêm!<br>
+      7️⃣ <strong>Cách 6 (⚡ TỰ ĐỘNG ẤN VÀO ĐÁP ÁN ĐÚNG ➔ Nút <kbd>⚡ Tự ấn</kbd> hoặc cấu hình Popup):</strong> Bật nút <strong>⚡ Tự ấn</strong> trên thanh công cụ HUD hoặc bật công tắc trong menu cài đặt. Khi AI chốt đáp án đúng (A/B/C/D), tiện ích sẽ <strong>tự động click chọn ngay vào phương án chuẩn trên trang bài thi</strong> (kể cả dạng thẻ màu như Quizizz/Wayground hay radio button)!
+    </div>
+
+    <!-- =================================================================
+         TRƯỜNG HỢP 1: CÂU 1 - KHÓA COPY & BÔI ĐEN CƠ BẢN (CSS user-select: none)
+    ================================================================== -->
+    <div class="question-card" id="qCard1">
+      <span class="case-badge badge-case1" data-wg-ignore="true">TRƯỜNG HỢP 1: Khóa CSS user-select & Chuột phải (Bypass tự động)</span>
+      <div class="case-instruction" data-wg-ignore="true">
+        👉 <strong>Cách test:</strong> Bạn có thể <strong>bôi đen chữ như bình thường</strong> rồi bấm <kbd>Alt + Q</kbd>, HOẶC chỉ cần <strong>đặt con trỏ chuột lên câu hỏi</strong> rồi bấm <kbd>Alt + Q</kbd>.
+      </div>
+      <div class="question-tag">Câu 1 (Bẫy phủ định - Tin học):</div>
+      <div class="question-title">
+        Trong các phát biểu sau đây về hệ điều hành máy tính, phát biểu nào sau đây là <strong>KHÔNG CHÍNH XÁC</strong>?
+      </div>
+      <div class="options-grid">
+        <label class="option-item">
+          <input type="radio" name="q1" class="option-radio">
+          <span class="option-text">A. Hệ điều hành quản lý việc phân phối tài nguyên phần cứng như CPU, RAM và ổ cứng.</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" class="option-radio">
+          <span class="option-text">B. Hệ điều hành cung cấp giao diện người dùng (GUI hoặc CLI) để tương tác với máy tính.</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" class="option-radio">
+          <span class="option-text">C. Hệ điều hành là phần mềm ứng dụng do người dùng cài thêm, không cần thiết để máy tính khởi động.</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q1" class="option-radio">
+          <span class="option-text">D. Linux, Windows và macOS là các hệ điều hành phổ biến hiện nay.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- =================================================================
+         TRƯỜNG HỢP 2: CÂU 2 - CHẶN BÔI ĐEN TUYỆT ĐỐI BẰNG JS + MÀNG CHẮN WATERMARK
+    ================================================================== -->
+    <div class="question-card" id="qCard2">
+      <!-- Lớp phủ Watermark đè lên trên câu hỏi -->
+      <div class="watermark-shield" data-wg-ignore="true" title="Lớp màng chắn chống bôi đen & chống click">
+        🔒 Lớp phủ chống bôi đen (Selection Blocker Active)
+      </div>
+
+      <span class="case-badge badge-case2" data-wg-ignore="true">TRƯỜNG HỢP 2: Khóa bôi đen tuyệt đối (Xóa Selection liên tục + Phủ màng chắn)</span>
+      <div class="case-instruction" data-wg-ignore="true">
+        👉 <strong>Mô phỏng:</strong> Ở khung Câu 2 này, trang web tự động xóa sạch mọi thao tác bôi đen chữ (`removeAllRanges`) và phủ 1 lớp kính chắn đè lên trên.<br>
+        👉 <strong>Cách test:</strong> Không cần bôi đen! Hãy bấm nút <strong><kbd>👆 Chỉ câu</kbd></strong> trên HUD (hoặc <kbd>Alt + S</kbd>) rồi <strong>Click chuột vào khung Câu 2 này</strong> (Hoặc đưa chuột vào Câu 2 rồi bấm <kbd>Alt + Q</kbd>)!
+      </div>
+      <div class="question-tag">Câu 2 (Khoa học - Tính toán):</div>
+      <div class="question-title">
+        Một vật chuyển động thẳng đều với vận tốc v = 15 m/s. Quãng đường vật đi được trong khoảng thời gian t = 20 giây là bao nhiêu?
+      </div>
+      <div class="options-grid">
+        <label class="option-item">
+          <input type="radio" name="q2" class="option-radio">
+          <span class="option-text">A. 150 m</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q2" class="option-radio">
+          <span class="option-text">B. 300 m</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q2" class="option-radio">
+          <span class="option-text">C. 200 m</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q2" class="option-radio">
+          <span class="option-text">D. 350 m</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- =================================================================
+         TRƯỜNG HỢP 3: CÂU 3 & CÂU 4 - TEST NÚT "🔍 QUÉT ĐỀ" CHỌN TỪNG CÂU
+    ================================================================== -->
+    <div class="question-card" id="qCard3">
+      <span class="case-badge badge-case3" data-wg-ignore="true">TRƯỜNG HỢP 3: Nhiều câu hỏi trên trang ➔ Test nút "🔍 Quét đề"</span>
+      <div class="case-instruction" data-wg-ignore="true">
+        👉 <strong>Cách test:</strong> Bấm nút <strong><kbd>🔍 Quét đề</kbd></strong> trên cửa sổ HUD ➔ Bạn sẽ thấy hiện ra thanh chọn <strong>`[Câu 1] [Câu 2] [Câu 3] [Câu 4]`</strong> ngay trong HUD. Bấm vào nút câu nào là giải ngay câu đó!
+      </div>
+      <div class="question-tag">Câu 3 (Tiếng Anh - Ngữ pháp Câu điều kiện):</div>
+      <div class="question-title">
+        Choose the best answer: "If I ________ enough time yesterday, I would have joined the workshop."
+      </div>
+      <div class="options-grid">
+        <label class="option-item">
+          <input type="radio" name="q3" class="option-radio">
+          <span class="option-text">A. have</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" class="option-radio">
+          <span class="option-text">B. had</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" class="option-radio">
+          <span class="option-text">C. had had</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q3" class="option-radio">
+          <span class="option-text">D. would have</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="question-card" id="qCard4">
+      <span class="case-badge badge-case3" data-wg-ignore="true">TRƯỜNG HỢP 3 (Tiếp): Câu hỏi Toán học</span>
+      <div class="question-tag">Câu 4 (Toán học - Phương trình):</div>
+      <div class="question-title">
+        Nghiệm của phương trình bậc nhất: 3x - 12 = 0 là giá trị nào dưới đây?
+      </div>
+      <div class="options-grid">
+        <label class="option-item">
+          <input type="radio" name="q4" class="option-radio">
+          <span class="option-text">A. x = 2</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q4" class="option-radio">
+          <span class="option-text">B. x = 3</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q4" class="option-radio">
+          <span class="option-text">C. x = 4</span>
+        </label>
+        <label class="option-item">
+          <input type="radio" name="q4" class="option-radio">
+          <span class="option-text">D. x = -4</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- =================================================================
+         TRƯỜNG HỢP 4: CÂU 5 - ĐỀ THI VẼ BẰNG HÌNH ẢNH / CANVAS (KHÔNG CÓ TEXT TRONG HTML)
+    ================================================================== -->
+    <div id="canvasExamSection" style="background: #0f172a; border: 1px solid #ec4899; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+      <span class="case-badge badge-case4">TRƯỜNG HỢP 4: Đề thi bằng Ảnh / Canvas 100% (Không hề có chữ trong mã HTML!)</span>
+      <div class="case-instruction" style="border-left-color: #ec4899; color: #fbcfe8;">
+        👉 <strong>Mô phỏng:</strong> Câu 5 dưới đây được vẽ hoàn toàn thành <strong>Hình ảnh đồ họa (`&lt;canvas&gt;`)</strong> — trong mã nguồn HTML hoàn toàn không có chữ để bôi đen hay quét DOM.<br>
+        👉 <strong>Cách test:</strong> Cuộn sao cho thấy rõ Câu 5 trên màn hình ➔ Bấm nút <strong><kbd>📸 Chụp</kbd></strong> trên HUD (hoặc bấm phím tắt <strong><kbd>Alt + V</kbd></strong>). AI Vision sẽ chụp màn hình và đọc chữ trong ảnh để giải!
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="canvasQuestion" width="740" height="230"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================================================
+    // 1. VẼ CÂU HỎI SỐ 5 LÊN THẺ CANVAS (ĐỀ THI DẠNG HÌNH ẢNH)
+    // =========================================================
+    window.drawCanvasQuestion = function drawCanvasQuestion() {
+      const canvas = document.getElementById("canvasQuestion");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+
+      // Nền
+      ctx.fillStyle = "#090d16";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Viền
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+
+      // Tiêu đề câu hỏi
+      ctx.fillStyle = "#fbbf24";
+      ctx.font = "bold 14px Segoe UI, sans-serif";
+      ctx.fillText("CÂU 5 (ĐỀ THI DẠNG HÌNH ẢNH CANVAS - KHÔNG CÓ VĂN BẢN HTML):", 20, 32);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 16px Segoe UI, sans-serif";
+      ctx.fillText("Thủ đô của nước Cộng hòa Xã hội Chủ nghĩa Việt Nam là thành phố nào?", 20, 64);
+
+      // 4 Đáp án vẽ trên ảnh
+      const options = [
+        "A. Thành phố Hồ Chí Minh",
+        "B. Thành phố Đà Nẵng",
+        "C. Thủ đô Hà Nội",
+        "D. Thành phố Huế"
+      ];
+
+      ctx.font = "15px Segoe UI, sans-serif";
+      options.forEach((opt, index) => {
+        const y = 102 + index * 32;
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(20, y - 20, 690, 26);
+        ctx.fillStyle = "#e2e8f0";
+        ctx.fillText(opt, 32, y - 2);
+      });
+    };
+    window.drawCanvasQuestion();
+
+    // =========================================================
+    // 2. CHẶN BÔI ĐEN TUYỆT ĐỐI Ở CÂU 2 (XÓA SELECTION LIÊN TỤC)
+    // =========================================================
+    const qCard2 = document.getElementById("qCard2");
+    if (qCard2) {
+      ["mousedown", "mousemove", "mouseup", "selectstart"].forEach((evt) => {
+        qCard2.addEventListener(evt, () => {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0) {
+            sel.removeAllRanges();
+          }
+        });
+      });
+    }
+
+    // =========================================================
+    // 3. MÔ PHỎNG GIÁM SÁT THI FULLSCREEN & CHUYỂN TAB (PROCTOR)
+    // =========================================================
+    let violationCount = 0;
+    const statFullscreen = document.getElementById("statFullscreen");
+    const statFocus = document.getElementById("statFocus");
+    const statViolations = document.getElementById("statViolations");
+    const btnEnterExamFullscreen = document.getElementById("btnEnterExamFullscreen");
+
+    function recordViolation(reason) {
+      violationCount++;
+      statViolations.textContent = `${violationCount} lần (${reason})`;
+      statViolations.classList.add("danger");
+    }
+
+    btnEnterExamFullscreen.addEventListener("click", () => {
+      const el = document.documentElement;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) {
+        req.call(el).then(() => {
+          statFullscreen.textContent = "✅ Đang BẬT Fullscreen";
+          btnEnterExamFullscreen.textContent = "✅ Đang ở chế độ Thi Fullscreen";
+        }).catch((err) => {
+          alert("Không thể bật Fullscreen: " + err.message);
+        });
+      }
+    });
+
+    // Trang thi cố gắng lắng nghe sự kiện thoát Fullscreen và chuyển Tab
+    // (Nếu Extension Wayground AI đã bật Anti-Detect, các sự kiện này sẽ bị chặn không tới được đây!)
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        statFullscreen.textContent = "❌ ĐÃ THOÁT FULLSCREEN!";
+        statFullscreen.classList.add("danger");
+        recordViolation("Thoát toàn màn hình");
+      } else {
+        statFullscreen.textContent = "✅ Đang BẬT Fullscreen";
+        statFullscreen.classList.remove("danger");
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        statFocus.textContent = "❌ ĐÃ RỜI TAB THI!";
+        statFocus.classList.add("danger");
+        recordViolation("Chuyển tab khác");
+      }
+    });
+
+    window.addEventListener("blur", () => {
+      statFocus.textContent = "⚠️ Mất tiêu điểm (Blur)!";
+      statFocus.classList.add("danger");
+      recordViolation("Mất focus cửa sổ");
+    });
+  </script>
+</body>
+</html>
