@@ -338,6 +338,11 @@
           triggerAltH();
         } else if (ev.data.action === "WG_TRIGGER_ALT_V") {
           triggerAltV();
+        } else if (ev.data.action === "WG_PANIC_CLOSE") {
+          if (window.__wgHud) {
+            window.__wgHud.stopPickQuestionMode();
+            window.__wgHud.closeWidget();
+          }
         }
       }
     });
@@ -352,6 +357,10 @@
 
       // Nếu sự kiện phím xảy ra trong iframe con, chuyển tiếp về khung chính (Top frame)
       if (!isTopFrame) {
+        if (e.key === "Escape" || e.code === "Escape" || e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight") {
+          try { window.top.postMessage({ action: "WG_PANIC_CLOSE" }, "*"); } catch (_) {}
+          return;
+        }
         if (e.altKey && (e.key === "q" || e.key === "Q" || e.code === "KeyQ")) {
           e.preventDefault();
           e.stopImmediatePropagation();
@@ -397,22 +406,28 @@
         return;
       }
 
-      // Phím Escape: Tắt nhanh bảng HUD hoặc Hủy chế độ Chỉ câu (Ngay lập tức)
-      if (e.key === "Escape" || e.code === "Escape") {
+      // Phím Ctrl hoặc Escape: Tắt nhanh bảng HUD hoặc Hủy chế độ Chỉ câu (Ngay lập tức)
+      const isPanicCloseKey =
+        e.key === "Escape" || e.code === "Escape" ||
+        e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight";
+
+      if (isPanicCloseKey) {
+        const hud = window.__wgHud;
         const isHudOpen =
-          window.__wgHud &&
-          (window.__wgHud.isPickQuestionMode ||
-            window.__wgHud.widgetVisible ||
-            (window.__wgHud.shadowRoot &&
-              window.__wgHud.shadowRoot.getElementById("aiWindow")?.classList.contains("visible")));
+          hud &&
+          (hud.isPickQuestionMode ||
+            hud.widgetVisible ||
+            (hud.shadowRoot &&
+              hud.shadowRoot.getElementById("aiWindow")?.classList.contains("visible")));
 
         if (isHudOpen) {
           e.preventDefault();
           e.stopImmediatePropagation();
-          window.__wgHud.stopPickQuestionMode();
-          window.__wgHud.closeWidget();
+          hud.stopPickQuestionMode();
+          hud.closeWidget();
           return;
         }
+      }
       }
 
       // Alt + S: Bật/Tắt chế độ Chỉ câu
@@ -441,3 +456,24 @@
     true
   );
 })();
+
+  // Keyup listener panic close: Nhả phím Ctrl hoặc bấm nhanh Ctrl là lập tức đóng HUD
+  window.addEventListener(
+    "keyup",
+    (e) => {
+      const isPanicCloseKey =
+        e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight";
+      if (isPanicCloseKey && window.__wgHud) {
+        const isHudOpen =
+          window.__wgHud.isPickQuestionMode ||
+          window.__wgHud.widgetVisible ||
+          (window.__wgHud.shadowRoot &&
+            window.__wgHud.shadowRoot.getElementById("aiWindow")?.classList.contains("visible"));
+        if (isHudOpen) {
+          window.__wgHud.stopPickQuestionMode();
+          window.__wgHud.closeWidget();
+        }
+      }
+    },
+    true
+  );

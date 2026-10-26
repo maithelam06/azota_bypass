@@ -543,10 +543,10 @@
       /* Quả cầu tròn nhỏ gọn (Ghost Orb) */
       .floating-orb {
         position: fixed;
-        top: 12px;
-        right: 12px;
-        width: 32px;
-        height: 32px;
+          bottom: 85px;
+          right: 24px;
+          width: 36px;
+          height: 36px;
         border-radius: 50%;
         background: rgba(30, 41, 59, 0.9);
         border: 1px solid #475569;
@@ -2030,3 +2030,18 @@
     };
   }
 })();
+
+    // Keyup listener panic close in content.js
+    window.addEventListener(
+      "keyup",
+      (e) => {
+        if (e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight") {
+          if (typeof isPickQuestionMode !== "undefined" && isPickQuestionMode) {
+            stopPickQuestionMode();
+          } else if (typeof widgetVisible !== "undefined" && widgetVisible) {
+            closeWidget();
+          }
+        }
+      },
+      true
+    );

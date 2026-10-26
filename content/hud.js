@@ -58,10 +58,10 @@
   const opacityLevels = [1.0, 0.45, 0.2, 0.06];
   let currentOpacityIndex = 0;
   const OPACITY_PRESETS = [
-    { label: "Màn sáng trường (5%)", idle: 0.015, hover: 0.07, tooltip: 0.18 },
-    { label: "Siêu mờ (12%)", idle: 0.03, hover: 0.14, tooltip: 0.35 },
-    { label: "Mờ vừa (25%)", idle: 0.06, hover: 0.28, tooltip: 0.55 },
-    { label: "Rõ nét (60%)", idle: 0.15, hover: 0.60, tooltip: 0.85 }
+    { label: "Mờ vừa phải (30%)", idle: 0.30, hover: 0.85, tooltip: 0.95 },
+    { label: "Rõ nét (60%)", idle: 0.60, hover: 1.0, tooltip: 1.0 },
+    { label: "Siêu mờ tàng hình (8%)", idle: 0.08, hover: 0.35, tooltip: 0.65 },
+    { label: "Tối đa (100%)", idle: 0.90, hover: 1.0, tooltip: 1.0 }
   ];
   let currentPresetIndex = 0;
   let toastTimer = null;
@@ -355,30 +355,35 @@
         }
 
         .floating-orb {
-          position: fixed;
-          bottom: 12px;
-          right: 12px;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          border: 1.5px solid rgba(56, 189, 248, 0.7);
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: grab;
-          z-index: 2147483647;
-          transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-          user-select: none;
-          backdrop-filter: blur(6px);
-          opacity: var(--orb-idle-op, 0.08);
-        }
+            position: fixed;
+            bottom: 85px;
+            right: 24px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(56, 189, 248, 0.7);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            z-index: 2147483647;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            backdrop-filter: blur(8px);
+            opacity: var(--orb-idle-op, 0.30);
+            touch-action: none;
+          }
+          .floating-orb.dragging {
+            cursor: grabbing !important;
+            transition: none !important;
+          }
         .floating-orb:hover {
           opacity: var(--orb-hover-op, 0.35) !important;
           transform: scale(1.12);
         }
         .floating-orb:active { cursor: grabbing; }
-        .floating-orb svg { width: 14px; height: 14px; fill: #38bdf8; transition: fill 0.2s; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
+        .floating-orb svg { width: 18px; height: 18px; fill: #38bdf8; transition: fill 0.2s; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
         .floating-orb:hover svg { fill: #7dd3fc; }
         .floating-orb.hidden { display: none !important; }
 
@@ -2012,6 +2017,20 @@
 
       this.bindOrbEyeButton();
 
+        // Panic close inside shadowRoot: Bấm Ctrl hoặc Escape bên trong HUD cũng lập tức tắt ngay
+        shadowRoot.addEventListener("keydown", (e) => {
+          if (e.repeat) return;
+          const isPanic =
+            e.key === "Escape" || e.code === "Escape" ||
+            e.key === "Control" || e.code === "ControlLeft" || e.code === "ControlRight";
+          if (isPanic) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.stopPickQuestionMode();
+            this.closeWidget();
+          }
+        }, true);
+
       try {
         chrome.storage.local.get(["orbOpacityPresetIdx", "stealthMode"], (res) => {
           if (!chrome.runtime.lastError && typeof res.orbOpacityPresetIdx === "number") {
@@ -2201,7 +2220,8 @@
         });
       }
 
-      this.makeDraggable(orb);
+      this.restoreOrbPosition(orb);
+        this.makeDraggable(orb);
       this.makeDraggableWindow(aiWindow, dragHeader);
     },
 
@@ -2437,41 +2457,84 @@
       }
     },
 
+    restoreOrbPosition(orb) {
+      if (!orb) return;
+      try {
+        chrome.storage.local.get(["orbPosLeft", "orbPosTop"], (res) => {
+          if (!chrome.runtime.lastError && res && typeof res.orbPosLeft === "number" && typeof res.orbPosTop === "number") {
+            const maxLeft = Math.max(0, window.innerWidth - 45);
+            const maxTop = Math.max(0, window.innerHeight - 45);
+            const left = Math.min(Math.max(10, res.orbPosLeft), maxLeft);
+            const top = Math.min(Math.max(10, res.orbPosTop), maxTop);
+            orb.style.left = left + "px";
+            orb.style.top = top + "px";
+            orb.style.right = "auto";
+            orb.style.bottom = "auto";
+          }
+        });
+      } catch (_) {}
+    },
+
     makeDraggable(element) {
       let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
       let hasDragged = false;
-      element.onmousedown = (e) => {
-        if (e.button !== 0) return;
-        startX = e.clientX; startY = e.clientY;
+
+      const onMouseDown = (e) => {
+        if (e.button !== 0) return; // Chỉ kéo bằng chuột trái
+        startX = e.clientX;
+        startY = e.clientY;
         const rect = element.getBoundingClientRect();
-        initialLeft = rect.left; initialTop = rect.top;
+        initialLeft = rect.left;
+        initialTop = rect.top;
         hasDragged = false;
 
         const onMouseMove = (ev) => {
-          if (Math.abs(ev.clientX - startX) > 4 || Math.abs(ev.clientY - startY) > 4) {
+          const dx = ev.clientX - startX;
+          const dy = ev.clientY - startY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
             hasDragged = true;
+            element.classList.add("dragging");
           }
           if (hasDragged) {
             ev.preventDefault();
-            element.style.top = Math.max(0, initialTop + (ev.clientY - startY)) + "px";
-            element.style.left = Math.max(0, initialLeft + (ev.clientX - startX)) + "px";
-            element.style.bottom = "auto";
+            const maxLeft = Math.max(0, window.innerWidth - element.offsetWidth - 10);
+            const maxTop = Math.max(0, window.innerHeight - element.offsetHeight - 10);
+            const newLeft = Math.min(Math.max(10, initialLeft + dx), maxLeft);
+            const newTop = Math.min(Math.max(10, initialTop + dy), maxTop);
+            element.style.left = newLeft + "px";
+            element.style.top = newTop + "px";
             element.style.right = "auto";
+            element.style.bottom = "auto";
           }
         };
 
         const onMouseUp = () => {
+          window.removeEventListener("mousemove", onMouseMove, true);
+          window.removeEventListener("mouseup", onMouseUp, true);
           document.removeEventListener("mousemove", onMouseMove, true);
           document.removeEventListener("mouseup", onMouseUp, true);
+          element.classList.remove("dragging");
+
           if (hasDragged) {
             element.setAttribute("data-dragged", "true");
-            setTimeout(() => element.removeAttribute("data-dragged"), 120);
+            setTimeout(() => element.removeAttribute("data-dragged"), 150);
+            const rect = element.getBoundingClientRect();
+            try {
+              chrome.storage.local.set({
+                orbPosLeft: Math.round(rect.left),
+                orbPosTop: Math.round(rect.top)
+              });
+            } catch (_) {}
           }
         };
 
+        window.addEventListener("mousemove", onMouseMove, true);
+        window.addEventListener("mouseup", onMouseUp, true);
         document.addEventListener("mousemove", onMouseMove, true);
         document.addEventListener("mouseup", onMouseUp, true);
       };
+
+      element.addEventListener("mousedown", onMouseDown);
     },
 
     makeDraggableWindow(winEl, headerEl) {
